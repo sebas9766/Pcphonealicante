@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fichaje de Trabajadores</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: url("pcphone/phoneportada.png") no-repeat center center fixed;
+      background-size: cover;
+      animation: zoom 20s infinite alternate;
+      color: white;
+    }
+
+    @keyframes zoom {
+      from {
+        background-size: 100%;
+      }
+      to {
+        background-size: 110%;
+      }
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      color: #ffffff;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    .formulario, .tabla {
+      width: 90%;
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #00c3ff;
+    }
+
+    select, button {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #f73d3d;
+      color: black;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #f73d3d;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #000000;
+    }
+
+    th {
+      background-color: #f73d3d
+    }
+
+    td button {
+      margin: 0 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Fichaje de Trabajadores</h1>
+
+  <div class="formulario">
+    <select id="trabajador">
+      <option value="">Selecciona tu nombre</option>
+      <option value="Elena">Elena</option>
+      <option value="Javier">Javier</option>
+      <option value="Omar">Omar</option>
+      <option value="Sebas">Sebas</option>
+      <option value="Chak">Chak</option>
+      <!-- Puedes añadir más trabajadores aquí -->
+    </select>
+    <button onclick="ficharEntrada()">Fichar Entrada ✅</button>
+    <button onclick="ficharSalida()">Fichar Salida ❌</button>
+  </div>
+
+  <div class="tabla">
+    <h2 style="text-align: center;">Historial de Fichajes</h2>
+    <button onclick="descargarFichajes()" style="background: limegreen; color: white;">Descargar Excel 📥</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Trabajador 🧑‍🔧</th>
+          <th>Fecha 📅</th>
+          <th>Entrada 🕘</th>
+          <th>Salida 🕔</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoFichajes"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let fichajes = JSON.parse(localStorage.getItem('fichajes')) || [];
+
+    function ficharEntrada() {
+      const trabajador = document.getElementById('trabajador').value;
+      if (!trabajador) {
+        alert("Por favor, selecciona tu nombre.");
+        return;
+      }
+
+      const hoy = new Date();
+      const fecha = hoy.toLocaleDateString('es-ES');
+      const horaEntrada = hoy.toLocaleTimeString('es-ES');
+
+      // Revisar si ya fichó hoy
+      const yaFichado = fichajes.find(f => f.trabajador === trabajador && f.fecha === fecha && !f.horaSalida);
+      if (yaFichado) {
+        alert("Ya has fichado entrada hoy. Debes fichar salida antes de volver a fichar entrada.");
+        return;
+      }
+
+      fichajes.push({ trabajador, fecha, horaEntrada, horaSalida: "" });
+      localStorage.setItem('fichajes', JSON.stringify(fichajes));
+      cargarFichajes();
+    }
+
+    function ficharSalida() {
+      const trabajador = document.getElementById('trabajador').value;
+      if (!trabajador) {
+        alert("Por favor, selecciona tu nombre.");
+        return;
+      }
+
+      const hoy = new Date();
+      const fecha = hoy.toLocaleDateString('es-ES');
+      const horaSalida = hoy.toLocaleTimeString('es-ES');
+
+      const fichaHoy = fichajes.find(f => f.trabajador === trabajador && f.fecha === fecha && !f.horaSalida);
+
+      if (!fichaHoy) {
+        alert("No has fichado entrada o ya has fichado salida hoy.");
+        return;
+      }
+
+      fichaHoy.horaSalida = horaSalida;
+      localStorage.setItem('fichajes', JSON.stringify(fichajes));
+      cargarFichajes();
+    }
+
+    function cargarFichajes() {
+      const cuerpo = document.getElementById('cuerpoFichajes');
+      cuerpo.innerHTML = "";
+
+      fichajes.forEach((fichaje, index) => {
+        cuerpo.innerHTML += `
+          <tr>
+            <td>${fichaje.trabajador}</td>
+            <td>${fichaje.fecha}</td>
+            <td>${fichaje.horaEntrada}</td>
+            <td>${fichaje.horaSalida || 'Pendiente'}</td>
+            <td>
+              <button onclick="editarFichaje(${index})" style="background:orange; color:white;">✏️</button>
+              <button onclick="borrarFichaje(${index})" style="background:red; color:white;">❌</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function borrarFichaje(index) {
+      if (confirm('¿Seguro que quieres borrar este fichaje?')) {
+        fichajes.splice(index, 1);
+        localStorage.setItem('fichajes', JSON.stringify(fichajes));
+        cargarFichajes();
+      }
+    }
+
+    function editarFichaje(index) {
+      const nuevoEntrada = prompt("Nueva hora de entrada (formato HH:MM)", fichajes[index].horaEntrada);
+      const nuevoSalida = prompt("Nueva hora de salida (formato HH:MM)", fichajes[index].horaSalida || '');
+
+      if (nuevoEntrada && nuevoSalida) {
+        fichajes[index].horaEntrada = nuevoEntrada;
+        fichajes[index].horaSalida = nuevoSalida;
+        localStorage.setItem('fichajes', JSON.stringify(fichajes));
+        cargarFichajes();
+      }
+    }
+    function descargarFichajes() {
+  let csv = "Trabajador,Fecha,Hora Entrada,Hora Salida\n";
+  fichajes.forEach(f => {
+    csv += `${f.trabajador},${f.fecha},${f.horaEntrada},${f.horaSalida}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', 'fichajes.csv');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+    cargarFichajes();
+  </script>
+
+</body>
+</html>
