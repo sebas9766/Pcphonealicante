@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedidos de Clientes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: url("pcphone/phoneportada.png") no-repeat center center fixed;
+      background-size: cover;
+      animation: zoom 20s infinite alternate;
+      color: white;
+    }
+
+    @keyframes zoom {
+      from { background-size: 100%; }
+      to { background-size: 110%; }
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      color: #ffffff;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    .formulario, .tabla {
+      width: 90%;
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #f73d3d;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    input {
+      width: 20%;
+    }
+
+    button {
+      background: #f73d3d;
+      color: black;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #f73d3d;
+      color: white;
+    }
+
+    .boton-excel {
+      background-color: #28a745;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .boton-excel:hover {
+      background-color: #218838;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #f73d3d;
+    }
+
+    th {
+      background-color: rgba(0, 195, 255, 0.3);
+      cursor: pointer;
+    }
+
+    td button {
+      margin: 0 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Pedidos de Clientes</h1>
+
+  <div class="formulario">
+    <input type="text" id="telefono" placeholder="Teléfono">
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="text" id="apellidos" placeholder="Apellidos">
+    <input type="text" id="producto" placeholder="Producto">
+    <button onclick="agregarPedido()">Agregar Cliente</button>
+  </div>
+
+  <div class="tabla">
+    <button class="boton-excel" onclick="exportarExcel()">📤 Exportar a Excel</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Teléfono 📞</th>
+          <th>Nombre 🧑</th>
+          <th>Apellidos 🧑</th>
+          <th>Producto 🛒</th>
+          <th>Fecha y Hora ⏰</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoPedidos"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+
+    function agregarPedido() {
+      const telefono = document.getElementById('telefono').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      const apellidos = document.getElementById('apellidos').value.trim();
+      const producto = document.getElementById('producto').value.trim();
+
+      if (telefono && nombre && apellidos && producto) {
+        const ahora = new Date();
+        const fechaHora = ahora.toLocaleString('es-ES');
+
+        pedidos.push({ telefono, nombre, apellidos, producto, fechaHora });
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        cargarPedidos();
+
+        document.getElementById('telefono').value = "";
+        document.getElementById('nombre').value = "";
+        document.getElementById('apellidos').value = "";
+        document.getElementById('producto').value = "";
+      } else {
+        alert("Por favor, rellena todos los campos.");
+      }
+    }
+
+    function cargarPedidos() {
+      const cuerpo = document.getElementById('cuerpoPedidos');
+      cuerpo.innerHTML = "";
+
+      pedidos.forEach((pedido, index) => {
+        cuerpo.innerHTML += `
+          <tr>
+            <td>${pedido.telefono}</td>
+            <td>${pedido.nombre}</td>
+            <td>${pedido.apellidos}</td>
+            <td>${pedido.producto}</td>
+            <td>${pedido.fechaHora || 'Fecha no disponible'}</td>
+            <td>
+              <button onclick="editarPedido(${index})" style="background:orange; color:white;">✏️</button>
+              <button onclick="borrarPedido(${index})" style="background:red; color:white;">❌</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function borrarPedido(index) {
+      if (confirm('¿Seguro que quieres borrar este cliente?')) {
+        pedidos.splice(index, 1);
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        cargarPedidos();
+      }
+    }
+
+    function editarPedido(index) {
+      const nuevoTelefono = prompt("Nuevo Teléfono:", pedidos[index].telefono);
+      const nuevoNombre = prompt("Nuevo Nombre:", pedidos[index].nombre);
+      const nuevosApellidos = prompt("Nuevos Apellidos:", pedidos[index].apellidos);
+      const nuevoProducto = prompt("Nuevo Producto:", pedidos[index].producto);
+
+      if (nuevoTelefono && nuevoNombre && nuevosApellidos && nuevoProducto) {
+        pedidos[index].telefono = nuevoTelefono;
+        pedidos[index].nombre = nuevoNombre;
+        pedidos[index].apellidos = nuevosApellidos;
+        pedidos[index].producto = nuevoProducto;
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        cargarPedidos();
+      }
+    }
+
+    function exportarExcel() {
+      let contenido = "Teléfono\tNombre\tApellidos\tProducto\tFecha y Hora\n";
+      pedidos.forEach(p => {
+        contenido += `${p.telefono}\t${p.nombre}\t${p.apellidos}\t${p.producto}\t${p.fechaHora}\n`;
+      });
+
+      const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pedidos_clientes.xls";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    cargarPedidos();
+  </script>
+
+</body>
+</html>

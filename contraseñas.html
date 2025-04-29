@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contraseñas - PCPhone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("pcphone/phoneportada.png") no-repeat center center;
+      background-size: cover;
+      z-index: -2;
+      animation: moverFondo 30s linear infinite;
+    }
+    @keyframes moverFondo {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    .bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .bubbles span {
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      bottom: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 30px;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 15px;
+      display: inline-block;
+    }
+
+    .formulario {
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.6);
+      width: 85%;
+      max-width: 700px;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+    }
+
+    input, button {
+      margin: 8px;
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    button {
+      background: #f73d3d;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #f73d3d;
+      transform: scale(1.05);
+    }
+
+    table {
+      margin: 30px auto;
+      width: 90%;
+      max-width: 1000px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      overflow: hidden;
+      border-collapse: collapse;
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+    }
+
+    table th, table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    table th {
+      background: #f73d3d;
+      color: rgb(255, 255, 255);
+    }
+
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .limpiar-btn {
+      margin-top: 20px;
+      background: red;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .limpiar-btn:hover {
+      background: darkred;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="background"></div>
+<div class="bubbles">
+  <span style="top:20%; left:10%"></span>
+  <span style="top:40%; left:80%"></span>
+  <span style="top:70%; left:30%"></span>
+  <span style="top:50%; left:50%"></span>
+  <span style="top:60%; left:70%"></span>
+</div>
+
+<h1>Contraseñas</h1>
+
+<div class="formulario">
+  <input type="text" id="sitio" placeholder="Sitio / Plataforma" required><br>
+  <input type="text" id="usuario" placeholder="Usuario" required><br>
+  <input type="text" id="clave" placeholder="Contraseña" required><br>
+  <button onclick="añadirPassword()">Guardar Contraseña</button>
+</div>
+
+<table id="tablaPasswords">
+  <thead>
+    <tr>
+      <th>Sitio</th>
+      <th>Usuario</th>
+      <th>Contraseña</th>
+      <th>Fecha</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="cuerpoPasswords"></tbody>
+</table>
+
+<button class="limpiar-btn" onclick="limpiarPasswords()">Borrar todo</button>
+<button class="limpiar-btn" style="background: green; margin-top: 10px;" onclick="descargarPasswordsExcel()">Descargar Excel</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', cargarPasswords);
+
+  function añadirPassword() {
+    const sitio = document.getElementById('sitio').value;
+    const usuario = document.getElementById('usuario').value;
+    const clave = document.getElementById('clave').value;
+    const fecha = new Date().toLocaleDateString();
+
+    if (!sitio || !usuario || !clave) {
+      alert("Rellena todos los campos");
+      return;
+    }
+
+    let contraseñas = JSON.parse(localStorage.getItem('passwords')) || [];
+    contraseñas.push({ sitio, usuario, clave, fecha });
+    localStorage.setItem('passwords', JSON.stringify(contraseñas));
+
+    cargarPasswords();
+    document.getElementById('sitio').value = "";
+    document.getElementById('usuario').value = "";
+    document.getElementById('clave').value = "";
+  }
+
+  function cargarPasswords() {
+    const cuerpo = document.getElementById('cuerpoPasswords');
+    const contraseñas = JSON.parse(localStorage.getItem('passwords')) || [];
+    cuerpo.innerHTML = "";
+
+    contraseñas.forEach((entry, index) => {
+      cuerpo.innerHTML += `<tr>
+        <td><input value="${entry.sitio}" onchange="editarCampo(${index}, 'sitio', this.value)"></td>
+        <td><input value="${entry.usuario}" onchange="editarCampo(${index}, 'usuario', this.value)"></td>
+        <td><input value="${entry.clave}" onchange="editarCampo(${index}, 'clave', this.value)"></td>
+        <td>${entry.fecha}</td>
+        <td><button onclick="eliminarPassword(${index})">Eliminar</button></td>
+      </tr>`;
+    });
+  }
+
+  function editarCampo(index, campo, valor) {
+    let contraseñas = JSON.parse(localStorage.getItem('passwords')) || [];
+    contraseñas[index][campo] = valor;
+    localStorage.setItem('passwords', JSON.stringify(contraseñas));
+  }
+
+  function eliminarPassword(index) {
+    let contraseñas = JSON.parse(localStorage.getItem('passwords')) || [];
+    contraseñas.splice(index, 1);
+    localStorage.setItem('passwords', JSON.stringify(contraseñas));
+    cargarPasswords();
+  }
+
+  function limpiarPasswords() {
+    if (confirm("¿Seguro que quieres borrar todas las contraseñas?")) {
+      localStorage.removeItem('passwords');
+      cargarPasswords();
+    }
+  }
+
+  function descargarPasswordsExcel() {
+    const contraseñas = JSON.parse(localStorage.getItem('passwords')) || [];
+    if (contraseñas.length === 0) {
+      alert("No hay contraseñas guardadas.");
+      return;
+    }
+    const datos = contraseñas.map(e => ({
+      Sitio: e.sitio,
+      Usuario: e.usuario,
+      Contraseña: e.clave,
+      Fecha: e.fecha
+    }));
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Contraseñas");
+    const fechaHoy = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(libro, `contraseñas_${fechaHoy}.xlsx`);
+  }
+</script>
+
+</body>
+</html>

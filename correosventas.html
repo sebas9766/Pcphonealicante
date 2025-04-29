@@ -1,0 +1,270 @@
+<!-- CAMBIO COMPLETO: copia y pega todo este código en tu archivo HTML -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Correos Ventas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ESTILOS IGUAL QUE ANTES (SIN CAMBIOS) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("pcphone/phoneportada.png") no-repeat center center;
+      background-size: cover;
+      z-index: -2;
+      animation: moverFondo 30s linear infinite;
+    }
+    @keyframes moverFondo {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    .bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .bubbles span {
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      bottom: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 30px;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 15px;
+      display: inline-block;
+    }
+
+    .formulario {
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.6);
+      width: 85%;
+      max-width: 700px;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+    }
+
+    input, button {
+      margin: 8px;
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    button {
+      background: #f73d3d;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background: #f73d3d;
+      transform: scale(1.05);
+    }
+
+    .tabla-container {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    table {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      overflow: hidden;
+      border-collapse: collapse;
+      width: 800px;
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+    }
+
+    table th, table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    table th {
+      background: #f73d3d;
+      color: black;
+    }
+
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .limpiar-btn {
+      margin-top: 20px;
+      background: red;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .limpiar-btn:hover {
+      background: darkred;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="background"></div>
+
+<div class="bubbles">
+  <span style="top:20%; left:10%"></span>
+  <span style="top:40%; left:80%"></span>
+  <span style="top:70%; left:30%"></span>
+  <span style="top:50%; left:50%"></span>
+  <span style="top:60%; left:70%"></span>
+</div>
+
+<h1>Correos y Ventas</h1>
+
+<div class="formulario">
+  <input type="text" id="codigo" placeholder="Correo" required><br>
+  <input type="text" id="nombre" placeholder="Número de ventas" required><br>
+  <button onclick="añadirMaterial()">Añadir Correo</button>
+</div>
+
+<div class="tabla-container">
+  <table id="tablaMaterial">
+    <thead>
+      <tr>
+        <th>Correo</th>
+        <th>Ventas</th>
+        <th>Fecha</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpoMaterial"></tbody>
+  </table>
+</div>
+
+<button class="limpiar-btn" onclick="limpiarMaterial()">Limpiar todo</button>
+<button class="limpiar-btn" style="background: green;" onclick="descargarExcel()">Descargar Excel</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', cargarMaterial);
+
+  function cargarMaterial() {
+    let lista = JSON.parse(localStorage.getItem('material')) || [];
+    let cuerpo = document.getElementById('cuerpoMaterial');
+    cuerpo.innerHTML = "";
+
+    lista.forEach((item, index) => {
+      cuerpo.innerHTML += `
+        <tr>
+          <td>${item.codigo}</td>
+          <td>${item.nombre}</td>
+          <td>${item.fecha}</td>
+          <td><button onclick="borrarFila(${index})" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">❌</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  function añadirMaterial() {
+    let codigo = document.getElementById('codigo').value.trim();
+    let nombre = document.getElementById('nombre').value.trim();
+    let fecha = new Date().toLocaleDateString();
+
+    if (!codigo || !nombre) {
+      alert("Introduce el correo y número de ventas.");
+      return;
+    }
+
+    let lista = JSON.parse(localStorage.getItem('material')) || [];
+    lista.push({ codigo, nombre, fecha });
+    localStorage.setItem('material', JSON.stringify(lista));
+
+    cargarMaterial();
+
+    document.getElementById('codigo').value = "";
+    document.getElementById('nombre').value = "";
+  }
+
+  function borrarFila(indice) {
+    let lista = JSON.parse(localStorage.getItem('material')) || [];
+    lista.splice(indice, 1);
+    localStorage.setItem('material', JSON.stringify(lista));
+    cargarMaterial();
+  }
+
+  function limpiarMaterial() {
+    if (confirm("¿Seguro que quieres borrar todo?")) {
+      localStorage.removeItem('material');
+      cargarMaterial();
+    }
+  }
+
+  function descargarExcel() {
+    let lista = JSON.parse(localStorage.getItem('material')) || [];
+
+    if (lista.length === 0) {
+      alert("No hay datos para exportar.");
+      return;
+    }
+
+    const datos = lista.map(item => ({
+      Correo: item.codigo,
+      Ventas: item.nombre,
+      Fecha: item.fecha
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Correos y Ventas");
+
+    const fechaHoy = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(libro, `correos_ventas_${fechaHoy}.xlsx`);
+  }
+</script>
+
+</body>
+</html>
+

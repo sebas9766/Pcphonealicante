@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bienvenido - Chak</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+    body, html {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      text-align: center;
+    }
+
+    body {
+      background: url("pcphone/phoneportada.png") center;
+      background-size: cover;
+      animation: moveBackground 30s linear infinite;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+      animation: fadeInDown 1s ease;
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin: 15px 0 30px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 15px;
+      border-radius: 10px;
+      animation: fadeInUp 3s ease;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeIn 2s ease;
+    }
+
+    nav a {
+      background: #ff1744;
+      padding: 15px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.5s ease;
+    }
+
+    nav a:hover {
+      background: #f50057;
+      transform: scale(1.1);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.8rem;
+      background: rgba(0,0,0,0.4);
+      padding: 5px 10px;
+      border-radius: 10px;
+      animation: fadeIn 3s ease;
+    }
+
+    /* Animaciones */
+    @keyframes moveBackground {
+      0% {
+        background-position: center;
+      }
+      50% {
+        background-position: center 10%;
+      }
+      100% {
+        background-position: center;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Bienvenido a PCPhone</h1>
+<p>Servicio Técnico Profesional</p>
+
+<nav>
+  <a href="caja.html">CAJA</a>
+  <a href="pedidosclientes.html">PEDIDOS CLIENTES</a>
+  <a href="contraseñas.html">CONTRASEÑAS</a>
+  <a href="material.html">MATERIAL PARA TECHNOFIX</a>
+  <a href="correosventas.html">CORREOS VENTAS</a>
+  <a href="sustitucion.html">TLF SUSTITUCIÓN</a>
+  <a href="fichajes.html">FICHAJES</a>
+</nav>
+
+</body>
+</html>
+
+
